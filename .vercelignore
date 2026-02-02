@@ -1,2 +1,2 @@
-# Ignorar backend API (é para Railway)
-api/
+# Ignorar backend API na raiz (é para Railway)
+/api
