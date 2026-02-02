@@ -1,6 +1,9 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 const authOptions: NextAuthOptions = {
   providers: [
     DiscordProvider({
