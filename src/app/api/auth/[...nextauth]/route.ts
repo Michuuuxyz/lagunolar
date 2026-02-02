@@ -16,11 +16,12 @@ const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, account, profile }) {
       if (account && profile && account.access_token) {
+        const discordProfile = profile as any;
         token.accessToken = account.access_token;
-        token.id = profile.id as string;
-        token.username = (profile as any).username as string;
-        token.discriminator = (profile as any).discriminator as string;
-        token.avatar = (profile as any).avatar as string | null;
+        token.id = discordProfile.id;
+        token.username = discordProfile.username;
+        token.discriminator = discordProfile.discriminator;
+        token.avatar = discordProfile.avatar;
       }
       return token;
     },
