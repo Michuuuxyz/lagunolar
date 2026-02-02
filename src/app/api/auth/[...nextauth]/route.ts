@@ -15,17 +15,17 @@ const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, account, profile }) {
-      if (account && profile) {
+      if (account && profile && account.access_token) {
         token.accessToken = account.access_token;
-        token.id = profile.id;
-        token.username = (profile as any).username;
-        token.discriminator = (profile as any).discriminator;
-        token.avatar = (profile as any).avatar;
+        token.id = profile.id as string;
+        token.username = (profile as any).username as string;
+        token.discriminator = (profile as any).discriminator as string;
+        token.avatar = (profile as any).avatar as string | null;
       }
       return token;
     },
     async session({ session, token }) {
-      if (token) {
+      if (token && token.accessToken) {
         session.user = {
           ...session.user,
           id: token.id as string,
