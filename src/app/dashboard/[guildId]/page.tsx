@@ -21,7 +21,7 @@ export default function GuildDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const params = useParams();
-  const guildId = params.guildId as string;
+  const guildId = params?.guildId as string;
 
   const [config, setConfig] = useState<GuildConfig | null>(null);
   const [loading, setLoading] = useState(true);
