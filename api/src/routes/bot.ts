@@ -31,7 +31,7 @@ router.get("/stats", async (req, res) => {
     }
 
     const guilds = client.guilds.cache;
-    const users = guilds.reduce((acc, guild) => acc + guild.memberCount, 0);
+    const users = guilds.reduce((acc: number, guild) => acc + guild.memberCount, 0);
 
     res.json({
       success: true,
