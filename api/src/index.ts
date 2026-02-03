@@ -8,6 +8,7 @@ import rateLimit from "express-rate-limit";
 // Routes
 import botRoutes from "./routes/bot";
 import guildRoutes from "./routes/guild";
+import logsRoutes from "./routes/logs";
 
 dotenv.config();
 
@@ -42,6 +43,7 @@ mongoose
 // Routes
 app.use("/api/bot", botRoutes);
 app.use("/api/guilds", guildRoutes);
+app.use("/api/logs", logsRoutes);
 
 // Health check
 app.get("/health", (req, res) => {

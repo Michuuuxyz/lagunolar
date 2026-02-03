@@ -75,12 +75,21 @@ class ApiClient {
   }
 
   // Logs
-  async getGuildLogs(guildId: string, limit = 50, offset = 0): Promise<LogEntry[]> {
-    const { data } = await this.client.get<ApiResponse<LogEntry[]>>(
-      `/api/guilds/${guildId}/logs`,
-      {
-        params: { limit, offset },
-      }
+  async getGuildLogs(guildId: string, type?: string, limit = 100, skip = 0): Promise<{ logs: LogEntry[], total: number }> {
+    const params: any = { limit, skip };
+    if (type) params.type = type;
+
+    const { data } = await this.client.get<ApiResponse<{ logs: LogEntry[], total: number, limit: number, skip: number }>>(
+      `/api/logs/${guildId}`,
+      { params }
+    );
+    if (!data.success) throw new Error(data.error);
+    return { logs: data.data!.logs, total: data.data!.total };
+  }
+
+  async getGuildLogStats(guildId: string): Promise<{ total: number, last24h: number, byType: { type: string, count: number }[] }> {
+    const { data } = await this.client.get<ApiResponse<{ total: number, last24h: number, byType: { type: string, count: number }[] }>>(
+      `/api/logs/${guildId}/stats`
     );
     if (!data.success) throw new Error(data.error);
     return data.data!;
