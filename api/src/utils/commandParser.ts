@@ -12,13 +12,43 @@ interface Command {
 }
 
 // Caminho para os comandos do bot Laguno
-const BOT_COMMANDS_PATH = path.join(__dirname, '../../../../Laguno/src/commands');
+// IMPORTANTE: Em produção, use variável de ambiente BOT_COMMANDS_PATH
+// Em desenvolvimento, tenta detectar automaticamente
+const getBotCommandsPath = () => {
+  if (process.env.BOT_COMMANDS_PATH) {
+    return process.env.BOT_COMMANDS_PATH;
+  }
+
+  // Fallback para desenvolvimento local - tenta diferentes caminhos
+  const possiblePaths = [
+    path.join(__dirname, '../../../Laguno/src/commands'),  // De dist/utils/
+    path.join(__dirname, '../../../../Laguno/src/commands'), // De src/utils/
+  ];
+
+  for (const testPath of possiblePaths) {
+    if (fs.existsSync(testPath)) {
+      console.log(`[COMMAND PARSER] ✅ Comandos encontrados em: ${testPath}`);
+      return testPath;
+    }
+  }
+
+  console.warn('[COMMAND PARSER] ⚠️ BOT_COMMANDS_PATH não configurado. Configure a variável de ambiente.');
+  return '';
+};
+
+const BOT_COMMANDS_PATH = getBotCommandsPath();
 
 /**
  * Lê e parseia todos os comandos do bot
  */
 export async function getAllCommands(): Promise<Command[]> {
   const commands: Command[] = [];
+
+  // Se BOT_COMMANDS_PATH estiver vazio, retornar lista vazia (produção)
+  if (!BOT_COMMANDS_PATH) {
+    return commands;
+  }
+
   const categories = ['Fun', 'Info', 'Moderation'];
 
   for (const category of categories) {
@@ -26,8 +56,7 @@ export async function getAllCommands(): Promise<Command[]> {
 
     // Verificar se a pasta existe
     if (!fs.existsSync(categoryPath)) {
-      console.warn(`Categoria ${category} não encontrada em ${categoryPath}`);
-      continue;
+      continue; // Silenciar warning em produção
     }
 
     const files = fs.readdirSync(categoryPath).filter(file => file.endsWith('.js'));
