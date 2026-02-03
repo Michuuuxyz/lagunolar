@@ -6,7 +6,7 @@ import { Input } from "../ui/Input";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "@/lib/api";
-import type { UserWarnings } from "@/types";
+import type { UserWarnings, BanData } from "@/types";
 import toast from "react-hot-toast";
 import {
   AlertTriangle,
@@ -26,16 +26,6 @@ import { fadeInUp, staggerContainer } from "@/lib/animations";
 
 interface ModerationPanelProps {
   guildId: string;
-}
-
-interface BanData {
-  userId: string;
-  username: string;
-  userTag: string;
-  reason: string;
-  moderatorId: string;
-  timestamp: Date;
-  active: boolean;
 }
 
 type Tab = "warns" | "bans";

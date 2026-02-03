@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from "axios";
-import type { ApiResponse, BotStats, GuildConfig, Command, UserWarnings, LogEntry } from "@/types";
+import type { ApiResponse, BotStats, GuildConfig, Command, UserWarnings, LogEntry, BanData } from "@/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -72,6 +72,15 @@ class ApiClient {
       `/api/guilds/${guildId}/warnings/${warnId}`
     );
     if (!data.success) throw new Error(data.error);
+  }
+
+  // Bans
+  async getGuildBans(guildId: string): Promise<BanData[]> {
+    const { data } = await this.client.get<ApiResponse<BanData[]>>(
+      `/api/guilds/${guildId}/bans`
+    );
+    if (!data.success) throw new Error(data.error);
+    return data.data!;
   }
 
   // Logs

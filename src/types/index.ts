@@ -103,6 +103,17 @@ export interface ApiResponse<T = any> {
   message?: string;
 }
 
+// Ban Data
+export interface BanData {
+  userId: string;
+  username: string;
+  userTag: string;
+  reason: string;
+  moderatorId: string;
+  timestamp: Date;
+  active: boolean;
+}
+
 // Session Types
 export interface Session {
   user: DiscordUser;
