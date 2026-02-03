@@ -2,7 +2,7 @@
 export interface DiscordUser {
   id: string;
   username: string;
-  discriminator: string;
+  global_name?: string; // Nome de exibição global do Discord
   avatar: string | null;
   email?: string;
   verified?: boolean;

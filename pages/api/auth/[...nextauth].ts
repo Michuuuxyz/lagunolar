@@ -15,26 +15,35 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, account, profile }) {
-      if (account && profile && account.access_token) {
-        const discordProfile = profile as any;
-        token.accessToken = account.access_token;
-        token.id = discordProfile.id;
-        token.username = discordProfile.username;
-        token.discriminator = discordProfile.discriminator;
-        token.avatar = discordProfile.avatar;
+      try {
+        if (account && profile && account.access_token) {
+          const discordProfile = profile as any;
+          token.accessToken = account.access_token;
+          token.id = discordProfile.id;
+          // Discord username global (não usa discriminator desde 2023)
+          token.username = discordProfile.global_name || discordProfile.username;
+          token.avatar = discordProfile.avatar;
+          token.email = discordProfile.email;
+        }
+      } catch (error) {
+        console.error("[NextAuth] Erro no callback JWT:", error);
       }
       return token;
     },
     async session({ session, token }) {
-      if (token && token.accessToken) {
-        session.user = {
-          ...session.user,
-          id: token.id as string,
-          username: token.username as string,
-          discriminator: token.discriminator as string,
-          avatar: token.avatar as string | null,
-        };
-        session.accessToken = token.accessToken as string;
+      try {
+        if (token && token.accessToken) {
+          session.user = {
+            ...session.user,
+            id: token.id as string,
+            username: token.username as string,
+            avatar: token.avatar as string | null,
+            email: token.email as string,
+          };
+          session.accessToken = token.accessToken as string;
+        }
+      } catch (error) {
+        console.error("[NextAuth] Erro no callback session:", error);
       }
       return session;
     },

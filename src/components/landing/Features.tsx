@@ -1,83 +1,116 @@
 "use client";
 
-import { Shield, MessageSquare, Activity, Settings, Users, Zap } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/Card";
+import { Shield, MessageSquare, BarChart3, Settings, Users, Zap } from "lucide-react";
 import { motion } from "framer-motion";
+import { fadeInUp, staggerContainer } from "@/lib/animations";
 
 const features = [
   {
     icon: Shield,
-    title: "Moderação Completa",
-    description: "Sistema de warns, bans, kicks e mutes. Mantém o teu servidor seguro e organizado.",
+    title: "Moderação Avançada",
+    description: "Sistema completo de moderação com warns, bans, mutes e logs detalhados.",
+    gradient: "from-reptile-gold via-reptile-amber to-reptile-bronze",
+  },
+  {
+    icon: BarChart3,
+    title: "Analytics em Tempo Real",
+    description: "Acompanhe estatísticas do servidor em tempo real com gráficos interativos.",
+    gradient: "from-reptile-amber via-reptile-gold to-reptile-bronze",
   },
   {
     icon: MessageSquare,
     title: "Sistema de Logs",
     description: "Regista todas as ações do servidor: mensagens, membros, roles e muito mais.",
-  },
-  {
-    icon: Activity,
-    title: "Comandos de Diversão",
-    description: "Piadas, calculadora, roasts e muito mais para entreter os membros.",
+    gradient: "from-reptile-bronze via-reptile-amber to-reptile-gold",
   },
   {
     icon: Settings,
     title: "Totalmente Configurável",
     description: "Dashboard intuitiva para configurar o bot ao teu gosto.",
+    gradient: "from-reptile-gold via-reptile-bronze to-reptile-amber",
   },
   {
     icon: Users,
-    title: "Info dos Membros",
-    description: "Comandos para ver avatares, informações de users e do servidor.",
+    title: "Gestão de Membros",
+    description: "Informações detalhadas de membros e ferramentas de gerenciamento avançadas.",
+    gradient: "from-reptile-amber via-reptile-bronze to-reptile-gold",
   },
   {
     icon: Zap,
-    title: "Rápido e Eficiente",
-    description: "Respostas instantâneas e desempenho otimizado.",
+    title: "Performance Extrema",
+    description: "Resposta instantânea com latência média de menos de 50ms.",
+    gradient: "from-reptile-bronze via-reptile-gold to-reptile-amber",
   },
 ];
 
 export function Features() {
   return (
-    <section id="features" className="py-20 px-4">
-      <div className="max-w-7xl mx-auto">
+    <section id="features" className="relative py-24 px-4 overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-gradient-to-b from-bg-darker via-bg-dark to-bg-darker" />
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-reptile-gold/5 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-reptile-amber/5 rounded-full blur-3xl" />
+
+      <div className="relative z-10 max-w-7xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true }}
+          variants={staggerContainer}
+          initial="initial"
+          whileInView="animate"
+          viewport={{ once: true, margin: "-100px" }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="text-white">Funcionalidades </span>
-            <span className="text-primary">Incríveis</span>
-          </h2>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Tudo o que precisas para gerir e animar o teu servidor Discord
-          </p>
+          <motion.div variants={fadeInUp} className="inline-block mb-4">
+            <span className="text-reptile-gold text-sm font-semibold tracking-wider uppercase">
+              Recursos Premium
+            </span>
+          </motion.div>
+          <motion.h2 variants={fadeInUp} className="text-4xl md:text-5xl font-bold mb-4 text-gradient-gold">
+            Tudo que Você Precisa
+          </motion.h2>
+          <motion.p variants={fadeInUp} className="text-gray-400 text-lg max-w-2xl mx-auto">
+            Ferramentas profissionais para gerenciar seu servidor Discord com excelência
+          </motion.p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          whileInView="animate"
+          viewport={{ once: true, margin: "-100px" }}
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
           {features.map((feature, index) => (
             <motion.div
-              key={feature.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              viewport={{ once: true }}
+              key={index}
+              variants={fadeInUp}
+              whileHover={{ scale: 1.05, y: -8 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="group relative glass rounded-xl p-6 border border-gray-800 hover:border-reptile-gold/50 transition-all duration-300 overflow-hidden"
             >
-              <Card className="h-full hover:border-primary transition-all duration-300 hover:scale-105">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                    <feature.icon className="w-6 h-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-xl">{feature.title}</CardTitle>
-                  <CardDescription>{feature.description}</CardDescription>
-                </CardHeader>
-              </Card>
+              {/* Shimmer Effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-reptile-gold/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 shimmer-effect" />
+
+              {/* Icon Container with Gradient */}
+              <div className="relative mb-6">
+                <div className={`inline-flex p-4 rounded-xl bg-gradient-to-br ${feature.gradient} shadow-gold`}>
+                  <feature.icon className="w-8 h-8 text-white" />
+                </div>
+                {/* Glow Effect on Hover */}
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-reptile-gold/20 to-reptile-amber/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+              </div>
+
+              <h3 className="text-xl font-bold mb-3 text-white group-hover:text-reptile-gold transition-colors">
+                {feature.title}
+              </h3>
+              <p className="text-gray-400 leading-relaxed">
+                {feature.description}
+              </p>
+
+              {/* Bottom Accent Line */}
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-reptile-gold to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
