@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Loader2 } from "lucide-react";
 import { Overview } from "@/components/dashboard/Overview";
 import { LogsConfig } from "@/components/dashboard/LogsConfig";
-import { WarnsPanel } from "@/components/dashboard/WarnsPanel";
+import { ModerationPanel } from "@/components/dashboard/ModerationPanel";
 import { CommandsList } from "@/components/dashboard/CommandsList";
 import { api } from "@/lib/api";
 import type { GuildConfig } from "@/types";
@@ -109,12 +109,7 @@ export default function GuildDashboard() {
                 <LogsConfig guildId={guildId} config={config} onUpdate={handleUpdateConfig} />
               )}
 
-              {activeTab === "moderation" && (
-                <div className="space-y-6">
-                  <h2 className="text-3xl font-bold text-gradient-gold mb-6">Moderação</h2>
-                  <WarnsPanel guildId={guildId} />
-                </div>
-              )}
+              {activeTab === "moderation" && <ModerationPanel guildId={guildId} />}
 
               {activeTab === "commands" && <CommandsList />}
 
