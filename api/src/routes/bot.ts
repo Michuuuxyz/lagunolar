@@ -2,6 +2,7 @@ import express from "express";
 import { Client, GatewayIntentBits } from "discord.js";
 import fs from "fs";
 import path from "path";
+import { getAllCommands } from "../utils/commandParser.js";
 
 const router = express.Router();
 
@@ -17,13 +18,17 @@ if (process.env.DISCORD_BOT_TOKEN) {
 // GET /api/bot/stats - Estatísticas do bot
 router.get("/stats", async (req, res) => {
   try {
+    // Obter número real de comandos
+    const commands = await getAllCommands();
+    const commandCount = commands.length;
+
     if (!client.isReady()) {
       return res.json({
         success: true,
         data: {
           servers: 0,
           users: 0,
-          commands: 0,
+          commands: commandCount,
           uptime: 0,
           ping: 0,
         },
@@ -38,7 +43,7 @@ router.get("/stats", async (req, res) => {
       data: {
         servers: guilds.size,
         users: users,
-        commands: 15, // Número fixo ou ler dos arquivos
+        commands: commandCount,
         uptime: process.uptime() * 1000,
         ping: client.ws.ping,
       },
@@ -49,30 +54,10 @@ router.get("/stats", async (req, res) => {
   }
 });
 
-// GET /api/bot/commands - Lista de comandos
+// GET /api/bot/commands - Lista de comandos sincronizada com o bot
 router.get("/commands", async (req, res) => {
   try {
-    // Aqui você pode ler os comandos do diretório do bot ou manter uma lista fixa
-    const commands = [
-      // Fun
-      { name: "joke", description: "Conta uma piada aleatória", category: "Fun" },
-      { name: "roast", description: "Dá um roast num user", category: "Fun", usage: "/roast @user" },
-      { name: "8ball", description: "Faz uma pergunta à bola mágica", category: "Fun", usage: "/8ball [pergunta]" },
-      { name: "calculator", description: "Calculadora interativa", category: "Fun" },
-      // Info
-      { name: "userinfo", description: "Informações de um utilizador", category: "Info", usage: "/userinfo [@user]" },
-      { name: "serverinfo", description: "Informações do servidor", category: "Info" },
-      { name: "avatar", description: "Mostra o avatar de alguém", category: "Info", usage: "/avatar [@user]" },
-      { name: "ping", description: "Verifica a latência do bot", category: "Info" },
-      { name: "help", description: "Lista de comandos", category: "Info" },
-      { name: "info", description: "Informações do bot", category: "Info" },
-      // Moderation
-      { name: "warn", description: "Avisa um utilizador", category: "Moderation", usage: "/warn @user [razão]", permissions: ["MODERATE_MEMBERS"] },
-      { name: "ban", description: "Bane um utilizador", category: "Moderation", usage: "/ban @user [razão]", permissions: ["BAN_MEMBERS"] },
-      { name: "kick", description: "Expulsa um utilizador", category: "Moderation", usage: "/kick @user [razão]", permissions: ["KICK_MEMBERS"] },
-      { name: "mute", description: "Silencia um utilizador", category: "Moderation", usage: "/mute @user [duração] [razão]", permissions: ["MODERATE_MEMBERS"] },
-      { name: "clear", description: "Limpa mensagens", category: "Moderation", usage: "/clear [quantidade]", permissions: ["MANAGE_MESSAGES"] },
-    ];
+    const commands = await getAllCommands();
 
     res.json({
       success: true,
