@@ -1,6 +1,7 @@
 import express from "express";
 import Guild from "../models/Guild";
 import Warn from "../models/Warn";
+import Ban from "../models/Ban";
 import { io } from "../index";
 
 const router = express.Router();
@@ -179,6 +180,48 @@ router.get("/:guildId/logs", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, error: "Erro ao buscar logs" });
+  }
+});
+
+// GET /api/guilds/:guildId/bans - Obter todos os banimentos do servidor
+router.get("/:guildId/bans", async (req, res) => {
+  try {
+    const { guildId } = req.params;
+    const { active = "true" } = req.query;
+
+    const query: any = { guildId };
+    if (active === "true") {
+      query.active = true;
+    }
+
+    const bans = await Ban.find(query).sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      data: bans,
+      total: bans.length,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: "Erro ao buscar banimentos" });
+  }
+});
+
+// GET /api/guilds/:guildId/bans/:userId - Obter banimentos de um usuário específico
+router.get("/:guildId/bans/:userId", async (req, res) => {
+  try {
+    const { guildId, userId } = req.params;
+
+    const bans = await Ban.find({ guildId, userId }).sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      data: bans,
+      total: bans.length,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: "Erro ao buscar banimentos" });
   }
 });
 

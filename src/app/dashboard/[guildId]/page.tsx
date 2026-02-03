@@ -5,10 +5,8 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Navbar } from "@/components/ui/Navbar";
 import { Button } from "@/components/ui/Button";
-import { Loader2, ArrowLeft, Settings, AlertTriangle, Activity, Terminal, FileText } from "lucide-react";
-import { Overview } from "@/components/dashboard/Overview";
+import { Loader2, ArrowLeft, Settings, AlertTriangle, Terminal } from "lucide-react";
 import { LogsConfig } from "@/components/dashboard/LogsConfig";
-import { LogsViewer } from "@/components/dashboard/LogsViewer";
 import { WarnsPanel } from "@/components/dashboard/WarnsPanel";
 import { CommandsList } from "@/components/dashboard/CommandsList";
 import { api } from "@/lib/api";
@@ -16,7 +14,7 @@ import type { GuildConfig } from "@/types";
 import toast from "react-hot-toast";
 import Link from "next/link";
 
-type Tab = "overview" | "logs" | "history" | "warns" | "commands";
+type Tab = "logs" | "warns" | "commands";
 
 export default function GuildDashboard() {
   const { data: session, status } = useSession();
@@ -26,7 +24,7 @@ export default function GuildDashboard() {
 
   const [config, setConfig] = useState<GuildConfig | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<Tab>("overview");
+  const [activeTab, setActiveTab] = useState<Tab>("logs");
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -81,9 +79,7 @@ export default function GuildDashboard() {
   }
 
   const tabs = [
-    { id: "overview", label: "Visão Geral", icon: Activity },
     { id: "logs", label: "Configurar Logs", icon: Settings },
-    { id: "history", label: "Histórico", icon: FileText },
     { id: "warns", label: "Avisos", icon: AlertTriangle },
     { id: "commands", label: "Comandos", icon: Terminal },
   ] as const;
@@ -124,11 +120,9 @@ export default function GuildDashboard() {
 
         {/* Tab Content */}
         <div className="animate-fade-in">
-          {activeTab === "overview" && <Overview />}
           {activeTab === "logs" && (
             <LogsConfig guildId={guildId} config={config} onUpdate={handleUpdateConfig} />
           )}
-          {activeTab === "history" && <LogsViewer guildId={guildId} />}
           {activeTab === "warns" && <WarnsPanel guildId={guildId} />}
           {activeTab === "commands" && <CommandsList />}
         </div>
