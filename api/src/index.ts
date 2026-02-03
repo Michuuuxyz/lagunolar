@@ -9,6 +9,7 @@ import rateLimit from "express-rate-limit";
 import botRoutes from "./routes/bot";
 import guildRoutes from "./routes/guild";
 import logsRoutes from "./routes/logs";
+import discordRoutes from "./routes/discord";
 
 dotenv.config();
 
@@ -43,16 +44,11 @@ app.use(limiter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// MongoDB Connection
-mongoose
-  .connect(process.env.MONGODB_URI!)
-  .then(() => console.log("✅ MongoDB conectado"))
-  .catch((err) => console.error("❌ Erro ao conectar MongoDB:", err));
-
 // Routes
 app.use("/api/bot", botRoutes);
 app.use("/api/guilds", guildRoutes);
 app.use("/api/logs", logsRoutes);
+app.use("/api/discord", discordRoutes);
 
 // Health check
 app.get("/health", (req, res) => {

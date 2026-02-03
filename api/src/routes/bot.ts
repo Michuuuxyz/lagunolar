@@ -2,7 +2,7 @@ import express from "express";
 import { Client, GatewayIntentBits } from "discord.js";
 import fs from "fs";
 import path from "path";
-import { getAllCommands } from "../utils/commandParser.js";
+import { getAllCommands } from "../utils/commandParser";
 
 const router = express.Router();
 
