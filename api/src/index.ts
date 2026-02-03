@@ -15,6 +15,12 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// MongoDB Connection
+mongoose
+  .connect(process.env.MONGODB_URI!)
+  .then(() => console.log("✅ MongoDB conectado"))
+  .catch((err) => console.error("❌ Erro ao conectar MongoDB:", err));
+
 // Trust proxy (necessário para Railway/Vercel/outros proxies)
 app.set('trust proxy', 1);
 
