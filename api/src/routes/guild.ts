@@ -33,22 +33,37 @@ router.patch("/:guildId/config", async (req, res) => {
     const { guildId } = req.params;
     const updates = req.body;
 
+    console.log(`[GUILD] Atualizando config para guild ${guildId}:`, JSON.stringify(updates));
+
     let guild = await Guild.findOne({ guildId });
 
     if (!guild) {
+      console.log(`[GUILD] Criando novo guild ${guildId}`);
       guild = new Guild({ guildId, ...updates });
     } else {
-      Object.assign(guild, updates);
+      console.log(`[GUILD] Guild ${guildId} encontrado, atualizando...`);
+
+      // Atualizar campos específicos para garantir que subdocumentos sejam salvos corretamente
+      if (updates.logChannel !== undefined) {
+        guild.logChannel = updates.logChannel;
+      }
+      if (updates.enabledLogs) {
+        guild.enabledLogs = { ...guild.enabledLogs?.toObject(), ...updates.enabledLogs };
+      }
+      if (updates.prefix !== undefined) {
+        guild.prefix = updates.prefix;
+      }
     }
 
     await guild.save();
+    console.log(`[GUILD] ✅ Config salva para guild ${guildId}. logChannel=${guild.logChannel}`);
 
     res.json({
       success: true,
       data: guild,
     });
   } catch (error) {
-    console.error(error);
+    console.error("[GUILD] ❌ Erro ao atualizar configuração:", error);
     res.status(500).json({ success: false, error: "Erro ao atualizar configuração" });
   }
 });
