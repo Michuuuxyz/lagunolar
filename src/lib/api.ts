@@ -105,6 +105,15 @@ class ApiClient {
     if (!data.success) throw new Error(data.error);
     return data.data!;
   }
+
+  // Guild Channels
+  async getGuildChannels(guildId: string): Promise<{ id: string; name: string; position: number }[]> {
+    const { data } = await this.client.get<ApiResponse<{ id: string; name: string; position: number }[]>>(
+      `/api/bot/guilds/${guildId}/channels`
+    );
+    if (!data.success) throw new Error(data.error);
+    return data.data!;
+  }
 }
 
 export const api = new ApiClient();
