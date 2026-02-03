@@ -9,7 +9,6 @@ import {
   LayoutDashboard,
   FileText,
   Shield,
-  Command,
   Settings,
   ChevronDown,
   LogOut,
@@ -50,12 +49,6 @@ const navigationItems = [
     label: "Moderação",
     icon: Shield,
     href: (guildId: string) => `/dashboard/${guildId}/moderation`,
-  },
-  {
-    id: "commands",
-    label: "Comandos",
-    icon: Command,
-    href: (guildId: string) => `/dashboard/${guildId}/commands`,
   },
   {
     id: "settings",

@@ -10,100 +10,16 @@ import {
   Activity,
   Shield,
   Eye,
+  Loader2,
 } from "lucide-react";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { StatsCard } from "./charts/StatsCard";
 import { ActivityChart } from "./charts/ActivityChart";
+import { api } from "@/lib/api";
 
 interface OverviewProps {
   guildId: string;
 }
-
-// Mock data - Replace with real API calls
-const mockStats = {
-  totalMembers: {
-    value: 1247,
-    change: 12.5,
-    trend: "up" as const,
-    sparklineData: [1100, 1150, 1180, 1200, 1220, 1235, 1247],
-  },
-  totalWarns: {
-    value: 43,
-    change: -8.3,
-    trend: "down" as const,
-    sparklineData: [52, 48, 45, 47, 44, 42, 43],
-  },
-  totalLogs: {
-    value: 328,
-    change: 5.2,
-    trend: "up" as const,
-    sparklineData: [280, 290, 310, 315, 320, 325, 328],
-  },
-  botLatency: {
-    value: 42,
-    change: 0,
-    trend: "neutral" as const,
-    sparklineData: [45, 43, 44, 42, 41, 42, 42],
-  },
-};
-
-const activityData = [
-  { date: "Seg", messages: 420, joins: 12, warns: 5, commands: 89 },
-  { date: "Ter", messages: 380, joins: 8, warns: 7, commands: 76 },
-  { date: "Qua", messages: 450, joins: 15, warns: 3, commands: 95 },
-  { date: "Qui", messages: 390, joins: 10, warns: 6, commands: 82 },
-  { date: "Sex", messages: 520, joins: 18, warns: 4, commands: 110 },
-  { date: "Sáb", messages: 610, joins: 22, warns: 2, commands: 125 },
-  { date: "Dom", messages: 480, joins: 14, warns: 3, commands: 98 },
-];
-
-const recentActivity = [
-  {
-    id: 1,
-    type: "member_join",
-    user: "NovoMembro#1234",
-    description: "Entrou no servidor",
-    timestamp: "2 min atrás",
-    icon: Users,
-    color: "text-success",
-  },
-  {
-    id: 2,
-    type: "warn",
-    user: "Infrator#5678",
-    description: "Recebeu advertência por spam",
-    timestamp: "15 min atrás",
-    icon: AlertTriangle,
-    color: "text-warning",
-  },
-  {
-    id: 3,
-    type: "message_delete",
-    user: "Moderador#9012",
-    description: "Deletou mensagem de @user",
-    timestamp: "32 min atrás",
-    icon: FileText,
-    color: "text-reptile-gold",
-  },
-  {
-    id: 4,
-    type: "member_leave",
-    user: "ExMembro#3456",
-    description: "Saiu do servidor",
-    timestamp: "1 hora atrás",
-    icon: Users,
-    color: "text-error",
-  },
-  {
-    id: 5,
-    type: "role_update",
-    user: "Admin#7890",
-    description: "Atualizou role @Moderador",
-    timestamp: "2 horas atrás",
-    icon: Shield,
-    color: "text-info",
-  },
-];
 
 const quickActions = [
   {
@@ -130,18 +46,51 @@ const quickActions = [
 ];
 
 export function Overview({ guildId }: OverviewProps) {
-  const [stats, setStats] = useState(mockStats);
-  const [isLoading, setIsLoading] = useState(false);
+  const [guildInfo, setGuildInfo] = useState<any>(null);
+  const [stats, setStats] = useState<any>(null);
+  const [activityData, setActivityData] = useState<any[]>([]);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // TODO: Fetch real data from API
-    // fetchOverviewData(guildId);
+    fetchOverviewData();
   }, [guildId]);
 
+  const fetchOverviewData = async () => {
+    try {
+      setIsLoading(true);
+
+      // Buscar dados em paralelo
+      const [info, guildStats, botStats, activity, recent] = await Promise.all([
+        api.getGuildInfo(guildId),
+        api.getGuildStats(guildId),
+        api.getBotStats(),
+        api.getActivityData(guildId),
+        api.getRecentLogs(guildId, 5),
+      ]);
+
+      setGuildInfo(info);
+      setStats(guildStats);
+      setActivityData(activity);
+      setRecentActivity(recent);
+    } catch (error) {
+      console.error("Erro ao buscar dados:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleQuickAction = (action: string) => {
-    // Handle navigation or action
     console.log("Quick action:", action);
   };
+
+  if (isLoading || !stats || !guildInfo) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-8 h-8 animate-spin text-reptile-gold" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -160,40 +109,39 @@ export function Overview({ guildId }: OverviewProps) {
       >
         <StatsCard
           title="Total de Membros"
-          value={stats.totalMembers.value}
-          change={stats.totalMembers.change}
-          trend={stats.totalMembers.trend}
+          value={guildInfo.memberCount}
+          change={0}
+          trend="neutral"
           icon={Users}
-          sparklineData={stats.totalMembers.sparklineData}
+          sparklineData={[0]}
           color="gold"
         />
         <StatsCard
           title="Warns (30 dias)"
-          value={stats.totalWarns.value}
-          change={stats.totalWarns.change}
-          trend={stats.totalWarns.trend}
+          value={stats.warnsLast30Days}
+          change={0}
+          trend="neutral"
           icon={AlertTriangle}
-          sparklineData={stats.totalWarns.sparklineData}
+          sparklineData={stats.sparklines.warns}
           color="warning"
         />
         <StatsCard
           title="Logs (hoje)"
-          value={stats.totalLogs.value}
-          change={stats.totalLogs.change}
-          trend={stats.totalLogs.trend}
+          value={stats.logsToday}
+          change={0}
+          trend="neutral"
           icon={FileText}
-          sparklineData={stats.totalLogs.sparklineData}
+          sparklineData={stats.sparklines.logs}
           color="info"
         />
         <StatsCard
-          title="Latência do Bot"
-          value={stats.botLatency.value}
-          suffix="ms"
-          change={stats.botLatency.change}
-          trend={stats.botLatency.trend}
-          icon={Zap}
-          sparklineData={stats.botLatency.sparklineData}
-          color="success"
+          title="Bans Ativos"
+          value={stats.totalBans}
+          change={0}
+          trend="neutral"
+          icon={Shield}
+          sparklineData={[0]}
+          color="error"
         />
       </motion.div>
 
@@ -257,24 +205,55 @@ export function Overview({ guildId }: OverviewProps) {
         >
           <h3 className="text-xl font-bold text-white mb-4">Atividade Recente</h3>
           <div className="space-y-3">
-            {recentActivity.map((activity, index) => (
-              <motion.div
-                key={activity.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="flex items-start gap-3 p-3 rounded-lg bg-bg-card border border-gray-800 hover:border-gray-700 transition-colors"
-              >
-                <div className={`p-2 rounded-lg bg-bg-darker ${activity.color}`}>
-                  <activity.icon className="w-4 h-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-medium">{activity.user}</p>
-                  <p className="text-gray-400 text-xs">{activity.description}</p>
-                </div>
-                <span className="text-gray-500 text-xs whitespace-nowrap">{activity.timestamp}</span>
-              </motion.div>
-            ))}
+            {recentActivity.length === 0 ? (
+              <p className="text-gray-400 text-center py-8">Nenhuma atividade recente</p>
+            ) : (
+              recentActivity.map((log: any, index) => {
+                const getLogIcon = (type: string) => {
+                  if (type.includes("message")) return FileText;
+                  if (type.includes("Member")) return Users;
+                  if (type.includes("warn") || type.includes("Ban")) return AlertTriangle;
+                  return Activity;
+                };
+
+                const getLogColor = (type: string) => {
+                  if (type.includes("message")) return "text-reptile-gold";
+                  if (type.includes("MemberAdd")) return "text-success";
+                  if (type.includes("MemberRemove")) return "text-error";
+                  if (type.includes("warn") || type.includes("Ban")) return "text-warning";
+                  return "text-info";
+                };
+
+                const Icon = getLogIcon(log.type);
+                const color = getLogColor(log.type);
+
+                const timeDiff = new Date().getTime() - new Date(log.createdAt).getTime();
+                const minutes = Math.floor(timeDiff / 60000);
+                const hours = Math.floor(timeDiff / 3600000);
+                const timeAgo = hours > 0 ? `${hours}h atrás` : `${minutes}min atrás`;
+
+                return (
+                  <motion.div
+                    key={log._id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="flex items-start gap-3 p-3 rounded-lg bg-bg-card border border-gray-800 hover:border-gray-700 transition-colors"
+                  >
+                    <div className={`p-2 rounded-lg bg-bg-darker ${color}`}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm font-medium">
+                        {log.executor?.username || log.target?.username || "Sistema"}
+                      </p>
+                      <p className="text-gray-400 text-xs">{log.action}</p>
+                    </div>
+                    <span className="text-gray-500 text-xs whitespace-nowrap">{timeAgo}</span>
+                  </motion.div>
+                );
+              })
+            )}
           </div>
         </motion.div>
       </div>

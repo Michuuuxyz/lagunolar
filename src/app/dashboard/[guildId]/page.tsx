@@ -10,13 +10,12 @@ import { Loader2 } from "lucide-react";
 import { Overview } from "@/components/dashboard/Overview";
 import { LogsConfig } from "@/components/dashboard/LogsConfig";
 import { ModerationPanel } from "@/components/dashboard/ModerationPanel";
-import { CommandsList } from "@/components/dashboard/CommandsList";
 import { api } from "@/lib/api";
 import type { GuildConfig } from "@/types";
 import toast from "react-hot-toast";
 import Link from "next/link";
 
-type Tab = "overview" | "logs" | "moderation" | "commands" | "settings";
+type Tab = "overview" | "logs" | "moderation" | "settings";
 
 export default function GuildDashboard() {
   const { data: session, status } = useSession();
@@ -25,6 +24,7 @@ export default function GuildDashboard() {
   const guildId = params?.guildId as string;
 
   const [config, setConfig] = useState<GuildConfig | null>(null);
+  const [guildInfo, setGuildInfo] = useState<{ name: string; icon: string | null } | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("overview");
 
@@ -35,6 +35,7 @@ export default function GuildDashboard() {
 
     if (session && guildId) {
       fetchConfig();
+      fetchGuildInfo();
     }
   }, [session, status, guildId]);
 
@@ -47,6 +48,15 @@ export default function GuildDashboard() {
       toast.error("Erro ao carregar configurações do servidor");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchGuildInfo = async () => {
+    try {
+      const info = await api.getGuildInfo(guildId);
+      setGuildInfo({ name: info.name, icon: info.icon });
+    } catch (error) {
+      console.error("Erro ao buscar informações do servidor:", error);
     }
   };
 
@@ -82,8 +92,8 @@ export default function GuildDashboard() {
 
   const guildData = {
     id: guildId,
-    name: "Servidor",
-    icon: null,
+    name: guildInfo?.name || "Carregando...",
+    icon: guildInfo?.icon || null,
   };
 
   return (
@@ -111,12 +121,29 @@ export default function GuildDashboard() {
 
               {activeTab === "moderation" && <ModerationPanel guildId={guildId} />}
 
-              {activeTab === "commands" && <CommandsList />}
-
-              {activeTab === "settings" && (
+              {activeTab === "settings" && config && (
                 <div className="glass-strong rounded-xl p-8 border border-gray-800">
                   <h2 className="text-3xl font-bold text-gradient-gold mb-4">Configurações</h2>
-                  <p className="text-gray-400">Configurações gerais do servidor - Em breve!</p>
+                  <div className="space-y-6 mt-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Prefixo do Bot
+                      </label>
+                      <input
+                        type="text"
+                        value={config.prefix || "!"}
+                        onChange={(e) => {
+                          const newPrefix = e.target.value;
+                          handleUpdateConfig({ prefix: newPrefix });
+                        }}
+                        className="w-full max-w-xs bg-bg-card border border-gray-800 rounded-lg px-4 py-3 text-white focus:border-reptile-gold focus:ring-2 focus:ring-reptile-gold/20 focus:outline-none"
+                        placeholder="!"
+                      />
+                      <p className="text-gray-500 text-sm mt-2">
+                        Prefixo usado para comandos de texto (padrão: !)
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

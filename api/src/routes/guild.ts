@@ -2,6 +2,7 @@ import express from "express";
 import Guild from "../models/Guild";
 import Warn from "../models/Warn";
 import Ban from "../models/Ban";
+import Log from "../models/Log";
 import { io } from "../index";
 
 const router = express.Router();
@@ -222,6 +223,94 @@ router.get("/:guildId/bans/:userId", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, error: "Erro ao buscar banimentos" });
+  }
+});
+
+// GET /api/guilds/:guildId/stats - Estatísticas agregadas do servidor
+router.get("/:guildId/stats", async (req, res) => {
+  try {
+    const { guildId } = req.params;
+
+    // Total de warns ativos
+    const totalWarns = await Warn.countDocuments({ guildId });
+
+    // Warns dos últimos 30 dias
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const warnsLast30Days = await Warn.countDocuments({
+      guildId,
+      timestamp: { $gte: thirtyDaysAgo },
+    });
+
+    // Total de bans ativos
+    const totalBans = await Ban.countDocuments({ guildId, active: true });
+
+    // Total de logs
+    const totalLogs = await Log.countDocuments({ guildId });
+
+    // Logs de hoje
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const logsToday = await Log.countDocuments({
+      guildId,
+      createdAt: { $gte: today },
+    });
+
+    // Logs dos últimos 7 dias para sparkline
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const logsSparkline: number[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const dayStart = new Date();
+      dayStart.setDate(dayStart.getDate() - i);
+      dayStart.setHours(0, 0, 0, 0);
+
+      const dayEnd = new Date(dayStart);
+      dayEnd.setHours(23, 59, 59, 999);
+
+      const count = await Log.countDocuments({
+        guildId,
+        createdAt: { $gte: dayStart, $lte: dayEnd },
+      });
+
+      logsSparkline.push(count);
+    }
+
+    const warnsSparkline: number[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const dayStart = new Date();
+      dayStart.setDate(dayStart.getDate() - i);
+      dayStart.setHours(0, 0, 0, 0);
+
+      const dayEnd = new Date(dayStart);
+      dayEnd.setHours(23, 59, 59, 999);
+
+      const count = await Warn.countDocuments({
+        guildId,
+        timestamp: { $gte: dayStart, $lte: dayEnd },
+      });
+
+      warnsSparkline.push(count);
+    }
+
+    res.json({
+      success: true,
+      data: {
+        totalWarns,
+        warnsLast30Days,
+        totalBans,
+        totalLogs,
+        logsToday,
+        sparklines: {
+          logs: logsSparkline,
+          warns: warnsSparkline,
+        },
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: "Erro ao buscar estatísticas" });
   }
 });
 

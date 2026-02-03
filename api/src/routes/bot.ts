@@ -69,6 +69,47 @@ router.get("/commands", async (req, res) => {
   }
 });
 
+// GET /api/bot/guilds/:guildId/info - Informações do servidor Discord
+router.get("/guilds/:guildId/info", async (req, res) => {
+  try {
+    const { guildId } = req.params;
+
+    if (!client.isReady()) {
+      return res.status(503).json({
+        success: false,
+        error: "Bot não está conectado"
+      });
+    }
+
+    const guild = client.guilds.cache.get(guildId);
+
+    if (!guild) {
+      return res.status(404).json({
+        success: false,
+        error: "Servidor não encontrado"
+      });
+    }
+
+    // Informações do servidor
+    const guildInfo = {
+      id: guild.id,
+      name: guild.name,
+      icon: guild.iconURL({ size: 256 }) || null,
+      memberCount: guild.memberCount,
+      owner: guild.ownerId,
+      createdAt: guild.createdAt.toISOString(),
+    };
+
+    res.json({
+      success: true,
+      data: guildInfo,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: "Erro ao buscar informações do servidor" });
+  }
+});
+
 // GET /api/bot/guilds/:guildId/channels - Buscar canais de texto de um servidor
 router.get("/guilds/:guildId/channels", async (req, res) => {
   try {

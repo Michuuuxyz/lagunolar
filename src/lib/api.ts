@@ -83,6 +83,46 @@ class ApiClient {
     return data.data!;
   }
 
+  // Guild Info & Stats
+  async getGuildInfo(guildId: string): Promise<{ id: string; name: string; icon: string | null; memberCount: number }> {
+    const { data } = await this.client.get<ApiResponse<any>>(
+      `/api/bot/guilds/${guildId}/info`
+    );
+    if (!data.success) throw new Error(data.error);
+    return data.data!;
+  }
+
+  async getGuildStats(guildId: string): Promise<{
+    totalWarns: number;
+    warnsLast30Days: number;
+    totalBans: number;
+    totalLogs: number;
+    logsToday: number;
+    sparklines: { logs: number[]; warns: number[] };
+  }> {
+    const { data } = await this.client.get<ApiResponse<any>>(
+      `/api/guilds/${guildId}/stats`
+    );
+    if (!data.success) throw new Error(data.error);
+    return data.data!;
+  }
+
+  async getRecentLogs(guildId: string, limit: number = 10): Promise<any[]> {
+    const { data } = await this.client.get<ApiResponse<any[]>>(
+      `/api/logs/${guildId}/recent?limit=${limit}`
+    );
+    if (!data.success) throw new Error(data.error);
+    return data.data!;
+  }
+
+  async getActivityData(guildId: string): Promise<any[]> {
+    const { data } = await this.client.get<ApiResponse<any[]>>(
+      `/api/logs/${guildId}/activity`
+    );
+    if (!data.success) throw new Error(data.error);
+    return data.data!;
+  }
+
   // Logs
   async getGuildLogs(guildId: string, type?: string, limit = 100, skip = 0): Promise<{ logs: LogEntry[], total: number }> {
     const params: any = { limit, skip };
