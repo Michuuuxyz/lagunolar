@@ -40,6 +40,7 @@ router.patch("/:guildId/config", async (req, res) => {
     if (!guild) {
       console.log(`[GUILD] Criando novo guild ${guildId}`);
       guild = new Guild({ guildId, ...updates });
+      await guild.save();
     } else {
       console.log(`[GUILD] Guild ${guildId} encontrado, atualizando...`);
 
@@ -47,20 +48,19 @@ router.patch("/:guildId/config", async (req, res) => {
       if (updates.logChannel !== undefined) {
         guild.logChannel = updates.logChannel;
       }
-      if (updates.enabledLogs) {
+      if (updates.enabledLogs && guild.enabledLogs) {
         // Atualizar cada campo individualmente para evitar problemas com subdocumentos
         Object.keys(updates.enabledLogs).forEach(key => {
-          if (guild.enabledLogs) {
-            (guild.enabledLogs as any)[key] = updates.enabledLogs[key];
-          }
+          (guild!.enabledLogs as any)[key] = updates.enabledLogs[key];
         });
       }
       if (updates.prefix !== undefined) {
         guild.prefix = updates.prefix;
       }
+
+      await guild.save();
     }
 
-    await guild.save();
     console.log(`[GUILD] ✅ Config salva para guild ${guildId}. logChannel=${guild.logChannel}`);
 
     res.json({
