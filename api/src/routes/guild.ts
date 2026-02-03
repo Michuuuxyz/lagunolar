@@ -1,6 +1,7 @@
 import express from "express";
 import Guild from "../models/Guild";
 import Warn from "../models/Warn";
+import { io } from "../index";
 
 const router = express.Router();
 
@@ -62,6 +63,17 @@ router.patch("/:guildId/config", async (req, res) => {
     }
 
     console.log(`[GUILD] ✅ Config salva para guild ${guildId}. logChannel=${guild.logChannel}`);
+
+    // Emitir evento WebSocket para notificar o bot
+    io.emit("guild:config:updated", {
+      guildId,
+      config: {
+        logChannel: guild.logChannel,
+        enabledLogs: guild.enabledLogs,
+        prefix: guild.prefix,
+      },
+    });
+    console.log(`[WEBSOCKET] 📡 Evento guild:config:updated enviado para guild ${guildId}`);
 
     res.json({
       success: true,
