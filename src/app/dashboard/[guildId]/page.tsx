@@ -82,7 +82,7 @@ export default function GuildDashboard() {
 
   const guildData = {
     id: guildId,
-    name: config.guildName || "Servidor",
+    name: "Servidor",
     icon: null,
   };
 
