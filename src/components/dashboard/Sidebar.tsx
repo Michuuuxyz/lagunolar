@@ -81,7 +81,7 @@ export function Sidebar({ guild, userGuilds = [], currentTab, onTabChange }: Sid
     if (currentTab) {
       return currentTab === itemId;
     }
-    return pathname.includes(itemId);
+    return pathname?.includes(itemId) || false;
   };
 
   const handleNavigation = (itemId: string) => {
