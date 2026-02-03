@@ -48,7 +48,12 @@ router.patch("/:guildId/config", async (req, res) => {
         guild.logChannel = updates.logChannel;
       }
       if (updates.enabledLogs) {
-        guild.enabledLogs = { ...guild.enabledLogs?.toObject(), ...updates.enabledLogs };
+        // Atualizar cada campo individualmente para evitar problemas com subdocumentos
+        Object.keys(updates.enabledLogs).forEach(key => {
+          if (guild.enabledLogs) {
+            (guild.enabledLogs as any)[key] = updates.enabledLogs[key];
+          }
+        });
       }
       if (updates.prefix !== undefined) {
         guild.prefix = updates.prefix;
